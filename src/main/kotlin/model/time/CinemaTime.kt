@@ -18,7 +18,7 @@ value class CinemaTime(
 
     fun toLocalTime() = time.toLocalTime()
 
-    fun toLocalDate() = time.toLocalDate()
+    fun isEqualDate(other: CinemaTime): Boolean = time.toLocalDate().isEqual(other.time.toLocalDate())
 
     fun format(pattern: String): String = time.format(DateTimeFormatter.ofPattern(pattern))
 

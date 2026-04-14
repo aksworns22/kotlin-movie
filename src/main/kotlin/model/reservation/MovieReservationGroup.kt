@@ -21,12 +21,7 @@ class MovieReservationGroup(
     override fun iterator(): Iterator<MovieReservationResult> = movieReservationGroup.iterator()
 
     fun isReservable(movieScreening: MovieScreening): Boolean =
-        !movieReservationGroup.any {
-            movieScreening.screenTime.overlaps(it.screenTime) &&
-                !it.isEqual(
-                    movieScreening,
-                )
-        }
+        !movieReservationGroup.any { movieScreening.overlaps(it.screenTime) && !it.isEqual(movieScreening) }
 
     fun hasAvailableSeat(movieScreening: MovieScreening): Boolean {
         val reservedSeatCount =
@@ -34,7 +29,7 @@ class MovieReservationGroup(
                 it.isEqual(movieScreening)
             }
 
-        return reservedSeatCount < movieScreening.seatGroup.size
+        return reservedSeatCount < movieScreening.seatCount
     }
 
     fun reserve(

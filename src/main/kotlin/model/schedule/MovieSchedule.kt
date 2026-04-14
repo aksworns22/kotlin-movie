@@ -15,7 +15,7 @@ class MovieSchedule(
     }
 
     operator fun get(startTime: CinemaTime): MovieScreening =
-        movieScreenings.firstOrNull { it.screenTime.start.isEqual(startTime) }
+        movieScreenings.firstOrNull { it.isSameStartDateTime(startTime) }
             ?: throw IllegalArgumentException("해당 시간에 존재하는 영화가 없습니다.")
 
     override fun equals(other: Any?): Boolean {
@@ -32,7 +32,7 @@ class MovieSchedule(
     fun getMovieSchedule(time: CinemaTime): MovieSchedule =
         MovieSchedule(
             movieScreenings.filter { screen ->
-                screen.screenTime.isStartDate(time)
+                screen.isSameStartDate(time)
             },
         )
 

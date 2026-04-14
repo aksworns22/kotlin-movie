@@ -3,7 +3,7 @@ package model.time
 data class CinemaTimeRange(
     val start: CinemaTime,
     val end: CinemaTime,
-) {
+) : Comparable<CinemaTimeRange> {
     init {
         require(start.isBefore(end)) { "시작 시간이 종료 시간보다 늦을 수 없습니다" }
     }
@@ -15,7 +15,13 @@ data class CinemaTimeRange(
         return time.isAfter(start) && time.isBefore(end)
     }
 
-    fun overlaps(other: CinemaTimeRange): Boolean = !start.isAfter(other.end) && !other.start.isAfter(end)
+    fun overlaps(timeRange: CinemaTimeRange): Boolean = !start.isAfter(timeRange.end) && !timeRange.start.isAfter(end)
 
-    fun isStartDate(time: CinemaTime): Boolean = time.toLocalDate().isEqual(start.toLocalDate())
+    override fun compareTo(other: CinemaTimeRange): Int {
+        val startTimeCompareResult = start.compareTo(other.start)
+        if (startTimeCompareResult == 0) {
+            return end.compareTo(other.end)
+        }
+        return startTimeCompareResult
+    }
 }

@@ -13,7 +13,7 @@ class SequentialMovieDiscount(
     private val discountableGroup: List<MovieDiscountable> = discountableGroup.toList()
 
     fun getDiscountedPrice(movieReservationResult: MovieReservationResult): Money {
-        val originalPrice = movieReservationResult.seat.grade.price
+        val originalPrice = movieReservationResult.price
         return discountableGroup.fold(originalPrice) { nextPrice, movieDiscountable ->
             nextPrice.minusWithMinimum(
                 money = movieDiscountable.getDiscountAmount(movieReservationResult),
@@ -45,7 +45,7 @@ class LateNightDiscount : MovieDiscountable {
 
 class MovieDayDiscount : MovieDiscountable {
     override fun getDiscountAmount(movieReservationResult: MovieReservationResult): Money {
-        val originalPrice = movieReservationResult.seat.grade.price
+        val originalPrice = movieReservationResult.price
         val discountDays = setOf(10, 20, 30)
         if (discountDays.contains(movieReservationResult.screenTime.start.dayOfMonth)) {
             return originalPrice applyRate 0.1

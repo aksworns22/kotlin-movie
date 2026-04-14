@@ -27,7 +27,7 @@ class DefaultMoviePayment(
     fun calculate(): MoviePaymentResult {
         val totalPrice =
             reservations.fold(Money(0)) { nextPrice, reservation ->
-                nextPrice + reservation.seat.grade.price
+                nextPrice + reservation.price
             }
         val movieDiscountedPrice =
             reservations.fold(Money(0)) { nextPrice, reservation ->
