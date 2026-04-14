@@ -13,7 +13,6 @@ import model.seat.SeatGrade
 import model.seat.SeatGroup
 import model.seat.SeatPosition
 import model.seat.SeatRow
-import model.seat.SeatState
 import model.time.CinemaTime
 import model.time.CinemaTimeRange
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -46,7 +45,6 @@ class MovieReservationGroupTest {
                                     ),
                                     grade = SeatGrade.A,
                                 ),
-                            state = SeatState.RESERVED,
                         ),
                     ),
             ).reserve(
@@ -127,7 +125,6 @@ class MovieReservationGroupTest {
                                     ),
                                     grade = SeatGrade.A,
                                 ),
-                            state = SeatState.PURCHASED,
                         ),
                     ),
             ).reserve(
@@ -277,7 +274,6 @@ class MovieReservationGroupTest {
                                     ),
                                     grade = SeatGrade.A,
                                 ),
-                            state = SeatState.RESERVED,
                         ),
                     ),
             )

@@ -20,7 +20,6 @@ import model.seat.SeatColumn
 import model.seat.SeatGrade
 import model.seat.SeatPosition
 import model.seat.SeatRow
-import model.seat.SeatState
 import model.time.CinemaTime
 import model.time.CinemaTimeRange
 import org.junit.jupiter.api.Test
@@ -42,7 +41,6 @@ class MoviePaymentResultTest {
                                 end = CinemaTime(LocalDateTime.of(2026, 4, 10, 11, 30)),
                             ),
                         seat = Seat(SeatPosition(SeatRow("A"), SeatColumn(1)), SeatGrade.A),
-                        state = SeatState.RESERVED,
                     ),
                     MovieReservationResult(
                         movie = Movie(MovieName("옥탑방에사는남자"), RunningTime(60)),
@@ -52,7 +50,6 @@ class MoviePaymentResultTest {
                                 end = CinemaTime(LocalDateTime.of(2026, 4, 11, 11, 30)),
                             ),
                         seat = Seat(SeatPosition(SeatRow("A"), SeatColumn(1)), SeatGrade.A),
-                        state = SeatState.RESERVED,
                     ),
                 ),
             )
@@ -74,7 +71,6 @@ class MoviePaymentResultTest {
                         end = CinemaTime(LocalDateTime.of(2026, 4, 10, 11, 30)),
                     ),
                 seat = Seat(SeatPosition(SeatRow("A"), SeatColumn(1)), SeatGrade.A),
-                state = SeatState.RESERVED,
             ),
         ) shouldBe (SeatGrade.A.price applyRate 0.1)
     }
@@ -90,7 +86,6 @@ class MoviePaymentResultTest {
                         end = CinemaTime(LocalDateTime.of(2026, 4, 12, 11, 30)),
                     ),
                 seat = Seat(SeatPosition(SeatRow("A"), SeatColumn(1)), SeatGrade.A),
-                state = SeatState.RESERVED,
             ),
         ) shouldBe Money(2_000)
     }
@@ -106,7 +101,6 @@ class MoviePaymentResultTest {
                         end = CinemaTime(LocalDateTime.of(2026, 4, 12, 21, 30)),
                     ),
                 seat = Seat(SeatPosition(SeatRow("A"), SeatColumn(1)), SeatGrade.A),
-                state = SeatState.RESERVED,
             ),
         ) shouldBe Money(2_000)
     }

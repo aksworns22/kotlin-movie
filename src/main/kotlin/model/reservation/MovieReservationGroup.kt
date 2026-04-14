@@ -2,7 +2,6 @@ package model.reservation
 
 import model.schedule.MovieScreening
 import model.seat.SeatPosition
-import model.seat.SeatState
 
 class MovieReservationGroup(
     movieReservations: Set<MovieReservationResult>,
@@ -47,21 +46,13 @@ class MovieReservationGroup(
                 movie = movieScreening.movie,
                 screenTime = movieScreening.screenTime,
                 seat = movieScreening.getSeat(seatPosition),
-                state = SeatState.RESERVED,
             )
 
         if (!isReservable(movieScreening)) {
             throw IllegalArgumentException("서로 시간이 겹치는 상영은 함께 예매할 수 없습니다.")
         }
 
-        if (movieReservationGroup.any {
-                movieReservationResult.isEqual(
-                    it.movie,
-                    it.screenTime,
-                    it.seat,
-                )
-            }
-        ) {
+        if (movieReservationGroup.any { movieReservationResult == it }) {
             throw IllegalArgumentException("이미 예약된 좌석입니다.")
         }
         return MovieReservationGroup(movieReservationGroup + movieReservationResult)
