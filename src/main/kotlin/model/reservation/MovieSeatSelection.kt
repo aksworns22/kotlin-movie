@@ -4,6 +4,7 @@ import model.movie.Movie
 import model.payment.Money
 import model.seat.Seat
 import model.time.CinemaTimeRange
+import java.time.LocalDateTime
 import java.util.Objects
 
 class MovieSeatSelection(
@@ -11,6 +12,10 @@ class MovieSeatSelection(
     private val screenTime: CinemaTimeRange,
     private val seat: Seat,
 ) {
+    val movieName: String get() = movie.getName()
+    val startTime: LocalDateTime = screenTime.getStartTime()
+    val seatName: String get() = seat.getName()
+
     val price: Money get() = seat.price
 
     override fun equals(other: Any?): Boolean {

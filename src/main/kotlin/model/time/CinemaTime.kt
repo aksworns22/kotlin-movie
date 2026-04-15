@@ -25,4 +25,6 @@ value class CinemaTime(
     override fun compareTo(other: CinemaTime): Int = time.compareTo(other.time)
 
     fun isSameDay(dayOfMonth: Int): Boolean = dayOfMonth == time.dayOfMonth
+
+    fun toLocalDateTime(): LocalDateTime = time
 }

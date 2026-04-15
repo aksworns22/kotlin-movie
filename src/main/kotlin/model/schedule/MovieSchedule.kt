@@ -2,6 +2,7 @@ package model.schedule
 
 import model.movie.MovieName
 import model.time.CinemaTime
+import java.time.LocalDateTime
 
 class MovieSchedule(
     private val movieName: MovieName,
@@ -33,7 +34,7 @@ class MovieSchedule(
 
     override fun hashCode(): Int = movieScreenings.hashCode()
 
-    fun getMovieSchedule(time: CinemaTime): MovieSchedule =
+    fun getSameDayMovieSchedule(time: CinemaTime): MovieSchedule =
         MovieSchedule(
             movieName = movieName,
             movieScreenings.filter { screen ->
@@ -42,4 +43,9 @@ class MovieSchedule(
         )
 
     fun isEmpty(): Boolean = movieScreenings.isEmpty()
+
+    fun getAllMovieStartTime(): List<LocalDateTime> =
+        movieScreenings.map {
+            it.getMovieStartTime()
+        }
 }

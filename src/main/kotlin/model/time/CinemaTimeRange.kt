@@ -1,5 +1,6 @@
 package model.time
 
+import java.time.LocalDateTime
 import java.util.Objects
 
 class CinemaTimeRange(
@@ -47,4 +48,6 @@ class CinemaTimeRange(
     fun isBeforeStartHour(hour: Int): Boolean = start.isBeforeHour(hour)
 
     fun isSameStartDayOfMonth(dayOfMonth: Int): Boolean = start.isSameDay(dayOfMonth)
+
+    fun getStartTime(): LocalDateTime = start.toLocalDateTime()
 }

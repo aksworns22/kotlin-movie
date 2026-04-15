@@ -9,4 +9,6 @@ data class Movie(
     fun isSameRunningTime(cinemaTimeRange: CinemaTimeRange): Boolean = runningTime.isSameDuration(cinemaTimeRange)
 
     fun isSameName(movieName: MovieName): Boolean = name == movieName
+
+    fun getName(): String = name.value
 }

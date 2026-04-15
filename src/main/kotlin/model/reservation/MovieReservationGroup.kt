@@ -41,12 +41,12 @@ class MovieReservationGroup(
         return MovieReservationGroup(movieReservationGroup + movieSeatSelection)
     }
 
-    private fun isReservable(movieScreening: MovieScreening): Boolean =
+    fun isReservable(movieScreening: MovieScreening): Boolean =
         !movieReservationGroup.any {
-            movieScreening.isEqual(it) && movieScreening.overlaps(it)
+            !movieScreening.isEqual(it) && movieScreening.overlaps(it)
         }
 
-    private fun hasAvailableSeat(movieScreening: MovieScreening): Boolean {
+    fun hasAvailableSeat(movieScreening: MovieScreening): Boolean {
         val reservedSeatCount =
             movieReservationGroup.count { movieSeatSelection ->
                 movieScreening.isEqual(movieSeatSelection)

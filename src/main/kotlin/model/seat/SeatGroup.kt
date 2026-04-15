@@ -16,4 +16,9 @@ class SeatGroup(
         val seat = seats.first { it.isEqual(seatPosition) }
         return seat
     }
+
+    fun getAllSeatNames(): List<String> =
+        seats.map { seat ->
+            seat.getName()
+        }
 }

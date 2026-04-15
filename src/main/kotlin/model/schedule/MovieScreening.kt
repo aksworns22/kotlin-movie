@@ -7,6 +7,7 @@ import model.seat.SeatGroup
 import model.seat.SeatPosition
 import model.time.CinemaTime
 import model.time.CinemaTimeRange
+import java.time.LocalDateTime
 import java.util.Objects
 
 class MovieScreening(
@@ -49,4 +50,8 @@ class MovieScreening(
             screenTime = screenTime,
             seat = seatGroup[seatPosition],
         )
+
+    fun getMovieStartTime(): LocalDateTime = screenTime.getStartTime()
+
+    fun getAllSeatNames(): List<String> = seatGroup.getAllSeatNames()
 }

@@ -9,4 +9,6 @@ data class Seat(
     val price: Money get() = grade.price
 
     fun isEqual(position: SeatPosition): Boolean = this.position == position
+
+    fun getName(): String = "${position.getName()}:${grade.name}"
 }
