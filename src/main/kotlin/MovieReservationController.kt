@@ -14,14 +14,13 @@ import java.time.format.DateTimeParseException
 
 class MovieReservationController(
     private val cinemaSchedule: CinemaSchedule,
-    private var movieReservationGroup: MovieReservationGroup =
-        MovieReservationGroup(
-            emptySet(),
-        ),
 ) {
-    fun handleMovieReservations(): MovieReservationGroup {
+    fun handleMovieReservations(
+        initialMovieReservationGroup: MovieReservationGroup = MovieReservationGroup(emptySet()),
+    ): MovieReservationGroup {
+        var movieReservationGroup: MovieReservationGroup = initialMovieReservationGroup
         do {
-            val movieScreening = getReservableMovieScreening()
+            val movieScreening = getReservableMovieScreening(movieReservationGroup)
             movieReservationGroup =
                 getMovieScreeningReservations(
                     movieScreening = movieScreening,
@@ -31,14 +30,16 @@ class MovieReservationController(
         return movieReservationGroup
     }
 
-    private fun getReservableMovieScreening(): MovieScreening {
+    private fun getReservableMovieScreening(movieReservationGroup: MovieReservationGroup): MovieScreening {
         while (true) {
             try {
                 val allScreensMovieSchedule = getMovieScheduleByName()
                 val movieSchedule = getMovieScheduleByDate(allScreensMovieSchedule)
-                val movieScreening = getMovieScreeningByTime(movieSchedule)
+                val movieScreening = getMovieScreeningByTime(movieReservationGroup, movieSchedule)
                 return movieScreening
             } catch (err: IllegalStateException) {
+                OutputView.showErrorMessage(err.message ?: "알 수 없는 오류가 발생했습니다.")
+            } catch (err: IllegalArgumentException) {
                 OutputView.showErrorMessage(err.message ?: "알 수 없는 오류가 발생했습니다.")
             }
         }
@@ -72,7 +73,10 @@ class MovieReservationController(
         }
     }
 
-    private fun getMovieScreeningByTime(movieSchedule: MovieSchedule): MovieScreening {
+    private fun getMovieScreeningByTime(
+        movieReservationGroup: MovieReservationGroup,
+        movieSchedule: MovieSchedule,
+    ): MovieScreening {
         while (true) {
             try {
                 val sortedMovieTimeTable = movieSchedule.getAllMovieStartTime().sorted()
