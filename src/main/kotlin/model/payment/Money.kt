@@ -14,8 +14,6 @@ value class Money(
 
     operator fun times(other: Int): Money = Money(value * other)
 
-    fun toInt(): Int = value
-
     fun minusWithMinimum(
         money: Money,
         minimum: Money,

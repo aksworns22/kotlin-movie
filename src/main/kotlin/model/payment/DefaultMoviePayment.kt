@@ -16,7 +16,7 @@ class DefaultMoviePayment(
             ),
         )
 
-    val sequentialPurchaseDiscount =
+    private val sequentialPurchaseDiscount =
         SequentialPurchaseDiscount(
             listOf(
                 PointDiscount(point),

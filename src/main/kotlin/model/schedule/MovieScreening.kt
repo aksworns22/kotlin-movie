@@ -1,7 +1,8 @@
 package model.schedule
 
 import model.movie.Movie
-import model.seat.Seat
+import model.movie.MovieName
+import model.reservation.MovieSeatSelection
 import model.seat.SeatGroup
 import model.seat.SeatPosition
 import model.time.CinemaTime
@@ -9,14 +10,14 @@ import model.time.CinemaTimeRange
 import java.util.Objects
 
 class MovieScreening(
-    val movie: Movie,
-    val screenTime: CinemaTimeRange,
-    val seatGroup: SeatGroup,
+    private val movie: Movie,
+    private val screenTime: CinemaTimeRange,
+    private val seatGroup: SeatGroup,
 ) {
     val seatCount: Int get() = seatGroup.size
 
     init {
-        require(movie.isSameDuration(screenTime)) { "영화의 러닝타임과 상영관의 상영 시간이 일치하지 않습니다." }
+        require(movie.isSameRunningTime(screenTime)) { "영화의 러닝타임과 상영관의 상영 시간이 일치하지 않습니다." }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -26,15 +27,26 @@ class MovieScreening(
         return false
     }
 
+    fun isEqual(movieSeatSelection: MovieSeatSelection): Boolean = movieSeatSelection.isEqual(movie, screenTime)
+
     override fun hashCode(): Int = Objects.hash(movie.hashCode(), screenTime.hashCode())
 
-    fun getSeat(seatPosition: SeatPosition): Seat = seatGroup[seatPosition]
+    fun isSameStartDate(time: CinemaTime): Boolean = screenTime.isSameStartDate(time)
 
-    fun isSameScreenTime(otherTime: CinemaTimeRange): Boolean = otherTime.start == screenTime.start && otherTime.end == screenTime.end
+    fun overlaps(other: MovieScreening): Boolean = screenTime.overlaps(other.screenTime)
 
-    fun isSameStartDate(time: CinemaTime): Boolean = time.isEqualDate(screenTime.start)
+    fun overlaps(movieSeatSelection: MovieSeatSelection): Boolean = movieSeatSelection.overlaps(screenTime)
 
-    fun overlaps(other: CinemaTimeRange): Boolean = screenTime.overlaps(other)
+    fun isSameStartDateTime(time: CinemaTime): Boolean = screenTime.isStartEqual(time)
 
-    fun isSameStartDateTime(time: CinemaTime): Boolean = time.isEqual(screenTime.start)
+    fun isScreeningMovie(movieName: MovieName): Boolean = movie.isSameName(movieName)
+
+    fun isBetween(servicePeriod: CinemaTimeRange): Boolean = servicePeriod.contains(screenTime)
+
+    fun selectSeat(seatPosition: SeatPosition): MovieSeatSelection =
+        MovieSeatSelection(
+            movie = movie,
+            screenTime = screenTime,
+            seat = seatGroup[seatPosition],
+        )
 }

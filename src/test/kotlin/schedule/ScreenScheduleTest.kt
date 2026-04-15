@@ -159,6 +159,7 @@ class ScreenScheduleTest {
             )[MovieName("혼자사는남자")],
         ).isEqualTo(
             MovieSchedule(
+                MovieName("혼자사는남자"),
                 listOf(
                     MovieScreening(
                         movie = movieOne,

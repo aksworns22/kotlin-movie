@@ -3,8 +3,8 @@ package model.seat
 import model.payment.Money
 
 data class Seat(
-    val position: SeatPosition,
-    val grade: SeatGrade,
+    private val position: SeatPosition,
+    private val grade: SeatGrade,
 ) {
     val price: Money get() = grade.price
 

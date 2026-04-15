@@ -13,5 +13,12 @@ class CinemaSchedule(
         }
     }
 
-    operator fun get(movieName: MovieName): MovieSchedule = MovieSchedule(screenSchedules.flatMap { it[movieName] })
+    operator fun get(movieName: MovieName): MovieSchedule =
+        MovieSchedule(
+            movieName = movieName,
+            movieScreenings =
+                screenSchedules.flatMap { screenSchedule ->
+                    screenSchedule[movieName]
+                },
+        )
 }

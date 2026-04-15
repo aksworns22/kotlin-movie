@@ -55,7 +55,7 @@ class CinemaScheduleTest {
                         ),
                     ),
             )[MovieName("혼자사는남자")],
-        ).isEqualTo(MovieSchedule(listOf(movieScreening, movieScreening)))
+        ).isEqualTo(MovieSchedule(MovieName("혼자사는남자"), listOf(movieScreening, movieScreening)))
     }
 
     @Test

@@ -4,12 +4,14 @@ import model.schedule.MovieScreening
 import model.seat.SeatPosition
 
 class MovieReservationGroup(
-    movieReservations: Set<MovieReservationResult>,
-) : Iterable<MovieReservationResult> {
+    movieReservations: Set<MovieSeatSelection>,
+) : Iterable<MovieSeatSelection> by movieReservations {
     private val movieReservationGroup = movieReservations.toSet()
 
     override fun equals(other: Any?): Boolean {
-        if (other is MovieReservationGroup) return movieReservationGroup == other.movieReservationGroup
+        if (other is MovieReservationGroup) {
+            return movieReservationGroup == other.movieReservationGroup
+        }
         return false
     }
 
@@ -18,38 +20,38 @@ class MovieReservationGroup(
     operator fun minus(other: MovieReservationGroup): MovieReservationGroup =
         MovieReservationGroup(movieReservationGroup - other.movieReservationGroup)
 
-    override fun iterator(): Iterator<MovieReservationResult> = movieReservationGroup.iterator()
-
-    fun isReservable(movieScreening: MovieScreening): Boolean =
-        !movieReservationGroup.any { movieScreening.overlaps(it.screenTime) && !it.isEqual(movieScreening) }
-
-    fun hasAvailableSeat(movieScreening: MovieScreening): Boolean {
-        val reservedSeatCount =
-            movieReservationGroup.count {
-                it.isEqual(movieScreening)
-            }
-
-        return reservedSeatCount < movieScreening.seatCount
-    }
-
-    fun reserve(
+    fun reserveSeat(
         movieScreening: MovieScreening,
         seatPosition: SeatPosition,
     ): MovieReservationGroup {
-        val movieReservationResult =
-            MovieReservationResult(
-                movie = movieScreening.movie,
-                screenTime = movieScreening.screenTime,
-                seat = movieScreening.getSeat(seatPosition),
-            )
+        val movieSeatSelection = movieScreening.selectSeat(seatPosition)
 
         if (!isReservable(movieScreening)) {
             throw IllegalArgumentException("서로 시간이 겹치는 상영은 함께 예매할 수 없습니다.")
         }
 
-        if (movieReservationGroup.any { movieReservationResult == it }) {
+        if (!hasAvailableSeat(movieScreening)) {
+            throw IllegalArgumentException("예매 가능한 좌석이 없습니다.")
+        }
+
+        if (movieReservationGroup.any { movieSeatSelection == it }) {
             throw IllegalArgumentException("이미 예약된 좌석입니다.")
         }
-        return MovieReservationGroup(movieReservationGroup + movieReservationResult)
+
+        return MovieReservationGroup(movieReservationGroup + movieSeatSelection)
+    }
+
+    private fun isReservable(movieScreening: MovieScreening): Boolean =
+        !movieReservationGroup.any {
+            movieScreening.isEqual(it) && movieScreening.overlaps(it)
+        }
+
+    private fun hasAvailableSeat(movieScreening: MovieScreening): Boolean {
+        val reservedSeatCount =
+            movieReservationGroup.count { movieSeatSelection ->
+                movieScreening.isEqual(movieSeatSelection)
+            }
+
+        return reservedSeatCount < movieScreening.seatCount
     }
 }

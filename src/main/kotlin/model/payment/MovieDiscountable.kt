@@ -1,10 +1,9 @@
 package model.payment
 
-import model.reservation.MovieReservationResult
-import java.time.LocalTime
+import model.reservation.MovieSeatSelection
 
 interface MovieDiscountable {
-    fun getDiscountAmount(movieReservationResult: MovieReservationResult): Money
+    fun getDiscountAmount(movieSeatSelection: MovieSeatSelection): Money
 }
 
 class SequentialMovieDiscount(
@@ -12,11 +11,11 @@ class SequentialMovieDiscount(
 ) {
     private val discountableGroup: List<MovieDiscountable> = discountableGroup.toList()
 
-    fun getDiscountedPrice(movieReservationResult: MovieReservationResult): Money {
-        val originalPrice = movieReservationResult.price
+    fun getDiscountedPrice(movieSeatSelection: MovieSeatSelection): Money {
+        val originalPrice = movieSeatSelection.price
         return discountableGroup.fold(originalPrice) { nextPrice, movieDiscountable ->
             nextPrice.minusWithMinimum(
-                money = movieDiscountable.getDiscountAmount(movieReservationResult),
+                money = movieDiscountable.getDiscountAmount(movieSeatSelection),
                 minimum = Money(0),
             )
         }
@@ -24,9 +23,8 @@ class SequentialMovieDiscount(
 }
 
 class EarlyMorningDiscount : MovieDiscountable {
-    override fun getDiscountAmount(movieReservationResult: MovieReservationResult): Money {
-        val time = movieReservationResult.screenTime.start.toLocalTime()
-        if (time.isAfter(LocalTime.of(11, 0))) {
+    override fun getDiscountAmount(movieSeatSelection: MovieSeatSelection): Money {
+        if (!movieSeatSelection.isBeforeScreeningStartHour(11)) {
             return Money(0)
         }
         return Money(2000)
@@ -34,9 +32,8 @@ class EarlyMorningDiscount : MovieDiscountable {
 }
 
 class LateNightDiscount : MovieDiscountable {
-    override fun getDiscountAmount(movieReservationResult: MovieReservationResult): Money {
-        val time = movieReservationResult.screenTime.end.toLocalTime()
-        if (time.isBefore(LocalTime.of(20, 0))) {
+    override fun getDiscountAmount(movieSeatSelection: MovieSeatSelection): Money {
+        if (movieSeatSelection.isBeforeScreeningStartHour(20)) {
             return Money(0)
         }
         return Money(2000)
@@ -44,10 +41,10 @@ class LateNightDiscount : MovieDiscountable {
 }
 
 class MovieDayDiscount : MovieDiscountable {
-    override fun getDiscountAmount(movieReservationResult: MovieReservationResult): Money {
-        val originalPrice = movieReservationResult.price
+    override fun getDiscountAmount(movieSeatSelection: MovieSeatSelection): Money {
+        val originalPrice = movieSeatSelection.price
         val discountDays = setOf(10, 20, 30)
-        if (discountDays.contains(movieReservationResult.screenTime.start.dayOfMonth)) {
+        if (discountDays.any { movieSeatSelection.isSameScreeningDay(it) }) {
             return originalPrice applyRate 0.1
         }
         return Money(0)

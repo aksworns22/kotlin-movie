@@ -5,7 +5,7 @@ import model.movie.Movie
 import model.movie.MovieName
 import model.movie.RunningTime
 import model.reservation.MovieReservationGroup
-import model.reservation.MovieReservationResult
+import model.reservation.MovieSeatSelection
 import model.schedule.MovieScreening
 import model.seat.Seat
 import model.seat.SeatColumn
@@ -26,7 +26,7 @@ class MovieReservationGroupTest {
             MovieReservationGroup(
                 movieReservations =
                     setOf(
-                        MovieReservationResult(
+                        MovieSeatSelection(
                             movie =
                                 Movie(
                                     name = MovieName("자취하는남자"),
@@ -47,7 +47,7 @@ class MovieReservationGroupTest {
                                 ),
                         ),
                     ),
-            ).reserve(
+            ).reserveSeat(
                 movieScreening =
                     MovieScreening(
                         movie =
@@ -106,7 +106,7 @@ class MovieReservationGroupTest {
             MovieReservationGroup(
                 movieReservations =
                     setOf(
-                        MovieReservationResult(
+                        MovieSeatSelection(
                             movie =
                                 Movie(
                                     name = MovieName("자취하는남자"),
@@ -127,7 +127,7 @@ class MovieReservationGroupTest {
                                 ),
                         ),
                     ),
-            ).reserve(
+            ).reserveSeat(
                 movieScreening =
                     MovieScreening(
                         movie =
@@ -184,7 +184,7 @@ class MovieReservationGroupTest {
     fun `구매 가능한 A1 좌석을 예약하면 결과에 A1 좌석 예약 정보가 추가된다`() {
         MovieReservationGroup(
             movieReservations = emptySet(),
-        ).reserve(
+        ).reserveSeat(
             movieScreening =
                 MovieScreening(
                     movie =
@@ -237,7 +237,7 @@ class MovieReservationGroupTest {
             MovieReservationGroup(
                 movieReservations =
                     setOf(
-                        MovieReservationResult(
+                        MovieSeatSelection(
                             movie =
                                 Movie(
                                     name = MovieName("자취하는남자"),

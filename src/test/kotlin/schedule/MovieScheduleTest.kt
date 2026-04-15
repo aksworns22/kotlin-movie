@@ -17,6 +17,7 @@ class MovieScheduleTest {
     fun `특정 영화의 상영 일정 목록에 포함된 모든 영화들이 같은 영화가 아니라면 예외를 발생시킨다`() {
         assertThatThrownBy {
             MovieSchedule(
+                MovieName("혼자사는남자"),
                 movieScreenings =
                     listOf(
                         createOneHourMovieScreening(

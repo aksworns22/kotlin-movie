@@ -1,16 +1,22 @@
 package model.schedule
 
+import model.movie.MovieName
 import model.time.CinemaTime
 
 class MovieSchedule(
+    private val movieName: MovieName,
     movieScreenings: List<MovieScreening>,
-) : Iterable<MovieScreening> {
+) : Iterable<MovieScreening> by movieScreenings {
     private val movieScreenings = movieScreenings.toList()
     val size: Int = movieScreenings.size
 
     init {
-        require(movieScreenings.distinctBy { it.movie }.size <= 1) {
-            "일정에 포함된 영화들은 모두 동일한 영화여야 합니다."
+        require(
+            movieScreenings.all { movieScreening ->
+                movieScreening.isScreeningMovie(movieName)
+            },
+        ) {
+            "일정에 포함된 영화들은 모두 동일한 영화 이름만 가능합니다."
         }
     }
 
@@ -27,10 +33,9 @@ class MovieSchedule(
 
     override fun hashCode(): Int = movieScreenings.hashCode()
 
-    override fun iterator(): Iterator<MovieScreening> = movieScreenings.iterator()
-
     fun getMovieSchedule(time: CinemaTime): MovieSchedule =
         MovieSchedule(
+            movieName = movieName,
             movieScreenings.filter { screen ->
                 screen.isSameStartDate(time)
             },

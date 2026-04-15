@@ -14,7 +14,7 @@ import model.payment.PayTypeDiscount
 import model.payment.Point
 import model.payment.PointDiscount
 import model.reservation.MovieReservationGroup
-import model.reservation.MovieReservationResult
+import model.reservation.MovieSeatSelection
 import model.seat.Seat
 import model.seat.SeatColumn
 import model.seat.SeatGrade
@@ -33,7 +33,7 @@ class MoviePaymentResultTest {
         val reservations =
             MovieReservationGroup(
                 setOf(
-                    MovieReservationResult(
+                    MovieSeatSelection(
                         movie = Movie(MovieName("옥탑방에사는남자"), RunningTime(60)),
                         screenTime =
                             CinemaTimeRange(
@@ -42,7 +42,7 @@ class MoviePaymentResultTest {
                             ),
                         seat = Seat(SeatPosition(SeatRow("A"), SeatColumn(1)), SeatGrade.A),
                     ),
-                    MovieReservationResult(
+                    MovieSeatSelection(
                         movie = Movie(MovieName("옥탑방에사는남자"), RunningTime(60)),
                         screenTime =
                             CinemaTimeRange(
@@ -63,7 +63,7 @@ class MoviePaymentResultTest {
     @Test
     fun `무비데이(매월 10일, 20일, 30일)에 상영되는 영화는 10% 할인된다`() {
         MovieDayDiscount().getDiscountAmount(
-            MovieReservationResult(
+            MovieSeatSelection(
                 movie = Movie(MovieName("옥탑방에사는남자"), RunningTime(60)),
                 screenTime =
                     CinemaTimeRange(
@@ -78,7 +78,7 @@ class MoviePaymentResultTest {
     @Test
     fun `오전 11시까지 시작하는 상영은 2,000원이 할인된다`() {
         EarlyMorningDiscount().getDiscountAmount(
-            MovieReservationResult(
+            MovieSeatSelection(
                 movie = Movie(MovieName("옥탑방에사는남자"), RunningTime(60)),
                 screenTime =
                     CinemaTimeRange(
@@ -93,7 +93,7 @@ class MoviePaymentResultTest {
     @Test
     fun `오후 8시부터 시작하는 상영은 2,000원이 할인된다`() {
         LateNightDiscount().getDiscountAmount(
-            MovieReservationResult(
+            MovieSeatSelection(
                 movie = Movie(MovieName("옥탑방에사는남자"), RunningTime(60)),
                 screenTime =
                     CinemaTimeRange(
