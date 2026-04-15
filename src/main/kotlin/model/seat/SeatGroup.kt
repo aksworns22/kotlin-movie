@@ -13,7 +13,7 @@ class SeatGroup(
     override fun iterator(): Iterator<Seat> = seats.iterator()
 
     operator fun get(seatPosition: SeatPosition): Seat {
-        val seat = seats.first { it.isEqual(seatPosition) }
+        val seat = seats.firstOrNull { it.isEqual(seatPosition) } ?: throw IllegalArgumentException("존재하지 않는 좌석입니다")
         return seat
     }
 
