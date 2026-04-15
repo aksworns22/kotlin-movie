@@ -188,4 +188,34 @@ class DefaultMoviePaymentTest {
         // then
         moviePaymentResult.finalPrice shouldBe finalPayAmount
     }
+
+    @Test
+    fun `무비데이(10일)에 조조(10시)로 A석을 예매하고, 1_000포인트를 사용한 뒤, 신용카드로 결제하면 9_975원이된다`() {
+        // given
+        val movieSeatSelection =
+            MovieSeatSelection(
+                movie = Movie(MovieName("옥탑방에사는남자"), RunningTime(60)),
+                screenTime =
+                    CinemaTimeRange(
+                        start = CinemaTime(LocalDateTime.of(2026, 4, 10, 10, 0)),
+                        end = CinemaTime(LocalDateTime.of(2026, 4, 10, 11, 0)),
+                    ),
+                seat = Seat(SeatPosition(SeatRow("A"), SeatColumn(1)), SeatGrade.A),
+            )
+        val reservations =
+            MovieReservationGroup(
+                setOf(movieSeatSelection),
+            )
+        val usedPoint = Point(1_000)
+        // when
+        val moviePaymentResult =
+            DefaultMoviePayment(
+                reservations = reservations,
+                point = usedPoint,
+                payType = PayType.CREDIT_CARD,
+            ).calculate()
+
+        // then
+        moviePaymentResult.finalPrice shouldBe Money(9_975)
+    }
 }
