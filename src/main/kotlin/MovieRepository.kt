@@ -2,10 +2,23 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.time.LocalDateTime
 
-data class MovieScreeningDTO(
+data class MovieScreeningDto(
     val title: String,
+    val screenId: Int,
     val runningTime: Int,
     val startTime: LocalDateTime,
+)
+
+data class MovieScreeningEntity(
+    val id: Int,
+    val movieId: Int,
+    val startTime: LocalDateTime,
+)
+
+data class MovieEntity(
+    val id: Int,
+    val title: String,
+    val runningTime: Int,
 )
 
 class MovieRepository(
@@ -56,6 +69,8 @@ class MovieRepository(
         runningTime: Int,
     ): String = "SELECT * FROM `movies` WHERE `title` = '$title' AND `running_time` = '$runningTime'"
 
+    private fun getMovieQuery(): String = "SELECT * FROM `movies`"
+
     private fun insertMovieQuery(
         title: String,
         runningTime: Int,
@@ -64,7 +79,9 @@ class MovieRepository(
     private fun getMovieScreeningQuery(
         movieId: Int,
         startTime: LocalDateTime,
-    ): String = "SELECT `id` FROM `movie_screenings` WHERE `movie_id` = '$movieId' AND `start_time` = '$startTime'"
+    ): String = "SELECT * FROM `movie_screenings` WHERE `movie_id` = '$movieId' AND `start_time` = '$startTime'"
+
+    private fun getMovieScreeningQuery(): String = "SELECT * FROM `movie_screenings`"
 
     private fun insertMovieScreeningQuery(
         movieId: Int,
@@ -81,9 +98,9 @@ class MovieRepository(
         }
     }
 
-    fun insertMovieScreenings(vararg movieScreenings: MovieScreeningDTO) {
+    fun insertMovieScreenings(vararg movieScreenings: MovieScreeningDto) {
         for (movieScreeningDTO in movieScreenings) {
-            val (title, runningTime, startTime) = movieScreeningDTO
+            val (title, _, runningTime, startTime) = movieScreeningDTO
             connection.createStatement().use { statement ->
                 insertMovie(title, runningTime)
                 val movieId = findMovieId(title, runningTime) ?: continue
@@ -112,6 +129,42 @@ class MovieRepository(
             val resultSet = statement.executeQuery(getMovieScreeningQuery(movieId, startTime))
             if (!resultSet.next()) return null
             return resultSet.getInt("id")
+        }
+    }
+
+    fun getAllMovieScreenings(): List<MovieScreeningDto> {
+        connection.createStatement().use { statement ->
+            val movieResultSet = statement.executeQuery(getMovieQuery())
+            val movies = mutableListOf<MovieEntity>()
+            while (movieResultSet.next()) {
+                movies.add(
+                    MovieEntity(
+                        id = movieResultSet.getInt("id"),
+                        title = movieResultSet.getString("title"),
+                        runningTime = movieResultSet.getInt("running_time"),
+                    ),
+                )
+            }
+            val screenings = mutableListOf<MovieScreeningEntity>()
+            val screeningResultSet = statement.executeQuery(getMovieScreeningQuery())
+            while (screeningResultSet.next()) {
+                screenings.add(
+                    MovieScreeningEntity(
+                        id = screeningResultSet.getInt("id"),
+                        movieId = screeningResultSet.getInt("movie_id"),
+                        startTime = screeningResultSet.getTimestamp("start_time").toLocalDateTime(),
+                    ),
+                )
+            }
+            return screenings.map { screeningEntity ->
+                val movieEntity = movies.first { it.id == screeningEntity.movieId }
+                MovieScreeningDto(
+                    title = movieEntity.title.trim(),
+                    runningTime = movieEntity.runningTime,
+                    startTime = screeningEntity.startTime,
+                    screenId = screeningEntity.id,
+                )
+            }
         }
     }
 }

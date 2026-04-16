@@ -27,4 +27,6 @@ value class CinemaTime(
     fun isSameDay(dayOfMonth: Int): Boolean = dayOfMonth == time.dayOfMonth
 
     fun toLocalDateTime(): LocalDateTime = time
+
+    fun plusMinutes(minute: Int): CinemaTime = CinemaTime(time.plusMinutes(minute.toLong()))
 }
