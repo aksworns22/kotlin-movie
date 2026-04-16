@@ -13,11 +13,10 @@ CREATE TABLE `User`(
 
 - [ ] 데이터베이스가 실제로 파일로 만들어진다
 - [x] User 테이블을 만든 후 `id:1, name:NoseKnee`를 실제로 저장하고 꺼내올 수 있다
-- [ ] User 테이블에 `id:1, name: NoseKnee`를 `id:1, name: Koni`로 바꿀 수 있다.
+- [x] User 테이블에 `id:1, name: NoseKnee`를 `id:1, name: Koni`로 바꿀 수 있다.
 - [ ] User 테이블에 `id:2, name: Miles`를 삭제할 수 있다.
 
 ### 스프링 학습
-
 
 ## 2. 영화 예매(프레임워크)
 
