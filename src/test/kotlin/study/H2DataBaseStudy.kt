@@ -4,16 +4,22 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.nio.file.Path
 import java.sql.Connection
 import java.sql.DriverManager
 
 class H2DataBaseStudy {
     private lateinit var dbConnection: Connection
 
+    @TempDir
+    lateinit var tempDir: Path
+
     @BeforeEach
     fun setUp() {
         dbConnection = DriverManager.getConnection("jdbc:h2:mem:test")
-        dbConnection.createStatement().execute("CREATE TABLE `user`(`id` INTEGER PRIMARY KEY, `name` VARCHAR(255))")
+        dbConnection.createStatement()
+            .use { it.execute("CREATE TABLE `user`(`id` INTEGER PRIMARY KEY, `name` VARCHAR(255))") }
     }
 
     @AfterEach
@@ -34,6 +40,7 @@ class H2DataBaseStudy {
         while (resultSet.next()) {
             resultSet.getString("name") shouldBe "NoseKnee"
         }
+        statement.close()
     }
 
     @Test
@@ -50,6 +57,7 @@ class H2DataBaseStudy {
         while (resultSet.next()) {
             resultSet.getString("name") shouldBe "Koni"
         }
+        statement.close()
     }
 
     @Test
@@ -64,5 +72,26 @@ class H2DataBaseStudy {
 
         // then
         resultSet.next() shouldBe false
+        statement.close()
+    }
+
+    @Test
+    fun `데이터베이스가 실제로 파일로 만들어지고 SQL을 통해 읽고 쓰기가 가능하다`() {
+        // given
+        val dbPath = tempDir.resolve("test-db")
+        val connection = DriverManager.getConnection("jdbc:h2:$dbPath")
+        val statement = connection.createStatement()
+        statement.execute("CREATE TABLE `user`(`id` INTEGER PRIMARY KEY, `name` VARCHAR(255))")
+
+        // when
+        statement.execute("INSERT INTO `user`(`id`, `name`) VALUES (1, 'NoseKnee')")
+        val resultSet = statement.executeQuery("SELECT * FROM `user` WHERE `id` = 1")
+
+        //then
+        while (resultSet.next()) {
+            resultSet.getString("name") shouldBe "NoseKnee"
+        }
+        statement.close()
+        connection.close()
     }
 }
