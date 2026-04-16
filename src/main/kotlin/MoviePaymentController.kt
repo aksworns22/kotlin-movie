@@ -10,7 +10,6 @@ class MoviePaymentController {
     fun handleMoviePayment(movieReservationGroup: MovieReservationGroup): MoviePaymentResult {
         val point = getPoint()
         val payType = getPayType()
-        // DefaultMoviePayment의 인터페이스를 만들어서 파라미터로 주입받아 확장성을 가져가 볼 수도 있을 것 같습니다!
         return DefaultMoviePayment(
             reservations = movieReservationGroup,
             point = point,

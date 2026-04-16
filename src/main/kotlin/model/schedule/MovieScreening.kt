@@ -16,6 +16,7 @@ class MovieScreening(
     private val seatGroup: SeatGroup,
 ) {
     val seatCount: Int get() = seatGroup.size
+    val info: String get() = "${movie.getName()}:${screenTime.getStartTime()}"
 
     init {
         require(movie.isSameRunningTime(screenTime)) { "영화의 러닝타임과 상영관의 상영 시간이 일치하지 않습니다." }

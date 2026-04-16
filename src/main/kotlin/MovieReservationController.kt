@@ -17,6 +17,7 @@ import model.time.CinemaTimeRange
 import view.InputView
 import view.MovieReservationResultDto
 import view.OutputView
+import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -151,6 +152,17 @@ class MovieReservationController(
                     }
                 val finalMovieReservationGroup =
                     seatPositions.fold(movieReservationGroup) { group, seatPosition ->
+                        require(
+                            !movieRepository.isReservedSeat(
+                                movieScreening.info.split(":").first(),
+                                LocalDateTime.parse(
+                                    movieScreening.info.substringAfter(":"),
+                                ),
+                                seatPosition.getName().split(":").first(),
+                            ),
+                        ) {
+                            "이미 예약된 좌석입니다. 다른 좌석을 선택해 주세요"
+                        }
                         group.reserveSeat(
                             movieScreening = movieScreening,
                             seatPosition = seatPosition,

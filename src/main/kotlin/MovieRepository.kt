@@ -13,12 +13,19 @@ data class MovieScreeningEntity(
     val id: Int,
     val movieId: Int,
     val startTime: LocalDateTime,
+    val screenId: Int,
 )
 
 data class MovieEntity(
     val id: Int,
     val title: String,
     val runningTime: Int,
+)
+
+data class MovieReservationDto(
+    val movieName: String,
+    val startTime: LocalDateTime,
+    val seatName: String,
 )
 
 class MovieRepository(
@@ -42,6 +49,7 @@ class MovieRepository(
             `id` INTEGER AUTO_INCREMENT,
             `movie_id` INTEGER NOT NULL,
             `start_time` TIMESTAMP NOT NULL,
+            `screen_id` INTEGER NOT NULL,
             PRIMARY KEY(`id`),
             CONSTRAINT `movie_id` FOREIGN KEY(`movie_id`) REFERENCES `movies`(`id`)
         );
@@ -51,10 +59,11 @@ class MovieRepository(
         """
         CREATE TABLE IF NOT EXISTS `movie_reservations`(
             `id` INTEGER AUTO_INCREMENT,
+            `reservation_id` INTEGER AUTO_INCREMENT,
+            `seat_name` CHAR(2) NOT NULL,
             `screening_id` INTEGER NOT NULL,
-            `seat` CHAR(2) NOT NULL,
             PRIMARY KEY(`id`),
-            CONSTRAINT `screen_id` FOREIGN KEY(`screening_id`) REFERENCES `movie_screenings`(`id`)
+            CONSTRAINT `screening_id` FOREIGN KEY(`screening_id`) REFERENCES `movie_screenings`(`id`)
         );
         """.trimIndent()
 
@@ -64,10 +73,7 @@ class MovieRepository(
         }
     }
 
-    private fun getMovieQuery(
-        title: String,
-        runningTime: Int,
-    ): String = "SELECT * FROM `movies` WHERE `title` = '$title' AND `running_time` = '$runningTime'"
+    private fun getMovieQuery(title: String): String = "SELECT * FROM `movies` WHERE `title` = '$title'"
 
     private fun getMovieQuery(): String = "SELECT * FROM `movies`"
 
@@ -81,41 +87,76 @@ class MovieRepository(
         startTime: LocalDateTime,
     ): String = "SELECT * FROM `movie_screenings` WHERE `movie_id` = '$movieId' AND `start_time` = '$startTime'"
 
+    private fun insertMovieReservationQuery(
+        reservationId: Int,
+        screeningId: Int,
+        seatName: String,
+    ): String =
+        "INSERT INTO `movie_reservations`(`reservation_id`, `screening_id`, `seat_name`) VALUES ($reservationId, $screeningId, '$seatName')"
+
     private fun getMovieScreeningQuery(): String = "SELECT * FROM `movie_screenings`"
 
     private fun insertMovieScreeningQuery(
         movieId: Int,
+        screenId: Int,
         startTime: LocalDateTime,
-    ): String = "INSERT INTO `movie_screenings` (`movie_id`, `start_time`) VALUES ($movieId, '$startTime')"
+    ): String = "INSERT INTO `movie_screenings` (`movie_id`, `screen_id`, `start_time`) VALUES ($movieId, $screenId, '$startTime')"
+
+    private fun getNextReservationId(): Int {
+        connection.createStatement().use { statement ->
+            val resultSet =
+                statement.executeQuery("SELECT COALESCE(MAX(reservation_id) + 1, 0) AS `next_id` FROM `movie_reservations`")
+            resultSet.next()
+            return resultSet.getInt("next_id")
+        }
+    }
 
     private fun insertMovie(
         title: String,
         runningTime: Int,
     ) {
         connection.createStatement().use { statement ->
-            if (statement.executeQuery(getMovieQuery(title, runningTime)).next()) return@use
+            if (statement.executeQuery(getMovieQuery(title)).next()) return@use
             statement.execute(insertMovieQuery(title, runningTime))
+        }
+    }
+
+    fun insertMovieReservation(vararg movieReservationDtoGroup: MovieReservationDto) {
+        val reservationId = getNextReservationId()
+        for (movieReservationDto in movieReservationDtoGroup) {
+            val (movieName, startTime, seatName) = movieReservationDto
+            val movieId = getMovieId(movieName) ?: continue
+            var movieScreeningId: Int? = null
+            connection.createStatement().use { statement ->
+                val resultSet = statement.executeQuery(getMovieScreeningQuery(movieId, startTime))
+                if (resultSet.next()) {
+                    movieScreeningId = resultSet.getInt("id")
+                }
+            }
+            println("$movieScreeningId, $reservationId, $seatName")
+            connection.createStatement().use { statement ->
+                if (movieScreeningId != null) {
+                    statement.execute(insertMovieReservationQuery(reservationId, movieScreeningId, seatName))
+                }
+            }
         }
     }
 
     fun insertMovieScreenings(vararg movieScreenings: MovieScreeningDto) {
         for (movieScreeningDTO in movieScreenings) {
-            val (title, _, runningTime, startTime) = movieScreeningDTO
+            val (title, screenId, runningTime, startTime) = movieScreeningDTO
             connection.createStatement().use { statement ->
                 insertMovie(title, runningTime)
-                val movieId = findMovieId(title, runningTime) ?: continue
+                val movieId = getMovieId(title) ?: continue
                 if (findMovieScreeningId(movieId, startTime) != null) continue
-                statement.execute(insertMovieScreeningQuery(movieId, startTime))
+                statement.execute(insertMovieScreeningQuery(movieId, screenId, startTime))
             }
         }
     }
 
-    private fun findMovieId(
-        title: String,
-        runningTime: Int,
-    ): Int? {
+    private fun getMovieId(title: String): Int? {
         connection.createStatement().use { statement ->
-            val resultSet = statement.executeQuery(getMovieQuery(title, runningTime))
+            val resultSet = statement.executeQuery(getMovieQuery(title))
             if (!resultSet.next()) return null
             return resultSet.getInt("id")
         }
@@ -153,6 +194,7 @@ class MovieRepository(
                         id = screeningResultSet.getInt("id"),
                         movieId = screeningResultSet.getInt("movie_id"),
                         startTime = screeningResultSet.getTimestamp("start_time").toLocalDateTime(),
+                        screenId = screeningResultSet.getInt("screen_id"),
                     ),
                 )
             }
@@ -162,9 +204,32 @@ class MovieRepository(
                     title = movieEntity.title.trim(),
                     runningTime = movieEntity.runningTime,
                     startTime = screeningEntity.startTime,
-                    screenId = screeningEntity.id,
+                    screenId = screeningEntity.screenId,
                 )
             }
+        }
+    }
+
+    fun isReservedSeat(
+        movieName: String,
+        startTime: LocalDateTime,
+        seatName: String,
+    ): Boolean {
+        val query =
+            """
+            SELECT 1
+            FROM movie_reservations mr
+            JOIN movie_screenings ms ON mr.screening_id = ms.id
+            JOIN movies m ON ms.movie_id = m.id
+            WHERE m.title = '$movieName'
+              AND ms.start_time = '$startTime'
+              AND mr.seat_name = '$seatName'
+            LIMIT 1
+            """.trimIndent()
+
+        connection.createStatement().use { statement ->
+            val rs = statement.executeQuery(query)
+            return rs.next()
         }
     }
 }
