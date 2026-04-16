@@ -51,4 +51,18 @@ class H2DataBaseStudy {
             resultSet.getString("name") shouldBe "Koni"
         }
     }
+
+    @Test
+    fun `User 테이블에 id_2, name_Miles를 삭제할 수 있다`() {
+        // given
+        val statement = dbConnection.createStatement()
+        statement.execute("INSERT INTO `user`(`id`, `name`) VALUES (2, 'Miles')")
+
+        // when
+        statement.execute("DELETE FROM `user` WHERE `id` = 2")
+        val resultSet = statement.executeQuery("SELECT * FROM `user` WHERE `id` = 2")
+
+        // then
+        resultSet.next() shouldBe false
+    }
 }
