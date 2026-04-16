@@ -15,10 +15,19 @@ import model.time.CinemaTimeRange
 import java.time.LocalDateTime
 
 fun main() {
-    CinemaController(
-        moviePaymentController = MoviePaymentController(),
-        movieReservationController = creatMovieReservationController(),
-    ).run()
+    val repository =
+        MovieRepository("~/test")
+
+    repository.insertMovieScreenings(
+        MovieScreeningDTO("혼자사는남자", 60, LocalDateTime.of(2026, 4, 8, 10, 0)),
+        MovieScreeningDTO("아이언맨", 60, LocalDateTime.of(2026, 4, 9, 7, 0)),
+        MovieScreeningDTO("혼자사는남자", 60, LocalDateTime.of(2026, 4, 10, 20, 0)),
+    )
+
+//    CinemaController(
+//        moviePaymentController = MoviePaymentController(),
+//        movieReservationController = creatMovieReservationController(),
+//    ).run()
 }
 
 private fun creatMovieReservationController(): MovieReservationController {

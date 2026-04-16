@@ -23,11 +23,11 @@ CREATE TABLE `User`
 
 ### 데이터 베이스
 
-- [ ] movie_reservations
+- [x] movie_reservations
     - seat, screening_id를 가진다
-- [ ] movie_screenings
+- [x] movie_screenings
     - start_time, movie_id를 가진다.
-- [ ] movies 테이블을 생성한다.
+- [x] movies 테이블을 생성한다.
     - id, title, running_time을 가진다
 
 - [ ] 임시로 main 함수에서 받던 상영 목록 데이터를 데이터베이스에서 가져온다
