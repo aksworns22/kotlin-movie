@@ -18,7 +18,8 @@ class H2DataBaseStudy {
     @BeforeEach
     fun setUp() {
         dbConnection = DriverManager.getConnection("jdbc:h2:mem:test")
-        dbConnection.createStatement()
+        dbConnection
+            .createStatement()
             .use { it.execute("CREATE TABLE `user`(`id` INTEGER PRIMARY KEY, `name` VARCHAR(255))") }
     }
 
@@ -87,7 +88,7 @@ class H2DataBaseStudy {
         statement.execute("INSERT INTO `user`(`id`, `name`) VALUES (1, 'NoseKnee')")
         val resultSet = statement.executeQuery("SELECT * FROM `user` WHERE `id` = 1")
 
-        //then
+        // then
         while (resultSet.next()) {
             resultSet.getString("name") shouldBe "NoseKnee"
         }
