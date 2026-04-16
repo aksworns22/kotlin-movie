@@ -1,4 +1,27 @@
-# 기능 구현 사항
+# 3-4단계 기능 구현 사항
+
+## 1. 데이터베이스(+ 쿼리문) 및 스프링 부트 학습 테스트
+
+### 데이터 베이스 학습
+
+```sql
+CREATE TABLE `User`(
+    `id` INT NOT NULL PRIMARY KEY,
+    `name` VARCHAT(255) NOT NULL
+)
+```
+
+- [ ] 데이터베이스가 실제로 파일로 만들어진다
+- [ ] User 테이블을 만든 후 `id:1, name:NoseKnee`를 실제로 저장하고 꺼내올 수 있다
+- [ ] User 테이블에 `id:1, name: NoseKnee`를 `id:1, name: Koni`로 바꿀 수 있다.
+- [ ] User 테이블에 `id:2, name: Miles`를 삭제할 수 있다.
+
+### 스프링 학습
+
+
+## 2. 영화 예매(프레임워크)
+
+# 1-2단계 기능 구현 사항
 
 ## 1. 영화 시간 배정
 
