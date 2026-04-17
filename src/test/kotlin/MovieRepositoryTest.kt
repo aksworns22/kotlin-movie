@@ -17,15 +17,17 @@ class MovieRepositoryTest :
             `when`("4월 16일 19시에 상영하는 고양이랑사는남자를 MovieRepository에 저장한다") {
                 val movie = Movie(MovieName("고양이랑사는남자"), RunningTime(60))
                 val startTime = LocalDateTime.of(2026, 4, 16, 19, 0)
-                val movieScreening = MovieScreening(
-                    screenId = 1,
-                    movie = movie,
-                    screenTime = CinemaTimeRange(
-                        start = CinemaTime(startTime),
-                        end = CinemaTime(startTime).plusMinutes(60)
-                    ),
-                    seatGroup = CinemaConstants.fixedSeatGroup
-                )
+                val movieScreening =
+                    MovieScreening(
+                        screenId = 1,
+                        movie = movie,
+                        screenTime =
+                            CinemaTimeRange(
+                                start = CinemaTime(startTime),
+                                end = CinemaTime(startTime).plusMinutes(60),
+                            ),
+                        seatGroup = CinemaConstants.fixedSeatGroup,
+                    )
 
                 movieRepository.insertMovieScreenings(movieScreening)
 
@@ -53,9 +55,10 @@ class MovieRepositoryTest :
             `when`("여러 좌석 예약을 한 번에 저장한다") {
                 val movieId = movieRepository.getMovieId("고양이랑사는남자")!!
                 val screeningId = movieRepository.getMovieScreeningId(movieId, LocalDateTime.of(2026, 4, 16, 19, 0))!!
-                val reservationId = movieRepository.insertMovieReservationBatch(
-                    mapOf(screeningId to listOf("C2", "C3"))
-                )
+                val reservationId =
+                    movieRepository.insertMovieReservationBatch(
+                        mapOf(screeningId to listOf("C2", "C3")),
+                    )
 
                 then("예약된 좌석은 isReservedSeatById가 true를 반환한다") {
                     movieRepository.isReservedSeatById(screeningId, "C2") shouldBe true

@@ -39,7 +39,8 @@ class MovieScreeningTest {
         assertThatThrownBy {
             MovieScreening(
                 screenId = 1,
-                movie = oneHourMovie,                screenTime =
+                movie = oneHourMovie,
+                screenTime =
                     CinemaTimeRange(
                         start = CinemaTime(LocalDateTime.of(2026, 4, 8, 16, 0)),
                         end = CinemaTime(LocalDateTime.of(2026, 4, 8, 18, 0)),
@@ -54,7 +55,8 @@ class MovieScreeningTest {
         assertThatCode {
             MovieScreening(
                 screenId = 1,
-                movie = oneHourMovie,                screenTime =
+                movie = oneHourMovie,
+                screenTime =
                     CinemaTimeRange(
                         start = CinemaTime(LocalDateTime.of(2026, 4, 8, 16, 0)),
                         end = CinemaTime(LocalDateTime.of(2026, 4, 8, 17, 0)),

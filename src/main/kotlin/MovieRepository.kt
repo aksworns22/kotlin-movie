@@ -16,7 +16,6 @@ data class MovieReservationDto(
     val seatName: String,
 )
 
-
 data class MovieScreeningEntity(
     val id: Int,
     val movieId: Int,
