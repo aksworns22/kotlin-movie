@@ -26,6 +26,7 @@ class CinemaScheduleTest {
 
         val movieScreening =
             MovieScreening(
+                screenId = 1,
                 movie =
                     Movie(
                         name = MovieName("혼자사는남자"),

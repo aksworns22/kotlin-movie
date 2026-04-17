@@ -1,15 +1,10 @@
-import model.movie.Movie
 import model.movie.MovieName
-import model.movie.RunningTime
 import model.reservation.MovieReservationGroup
 import model.schedule.CinemaSchedule
 import model.schedule.MovieSchedule
 import model.schedule.MovieScreening
 import model.schedule.ScreenSchedule
-import model.seat.Seat
 import model.seat.SeatColumn
-import model.seat.SeatGrade
-import model.seat.SeatGroup
 import model.seat.SeatPosition
 import model.seat.SeatRow
 import model.time.CinemaTime
@@ -19,36 +14,18 @@ import view.MovieReservationResultDto
 import view.OutputView
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 class MovieReservationController(
     private val movieRepository: MovieRepository,
     serviceTime: CinemaTimeRange,
 ) {
     private val cinemaSchedule =
-
         CinemaSchedule(
-            movieRepository.getAllMovieScreenings().groupBy { it.screenId }.map { (screenId, screenDtoGroup) ->
+            movieRepository.getAllMovieScreenings().groupBy { it.screenId }.map { (screenId, movieScreenings) ->
                 ScreenSchedule(
                     screenId = screenId.toString(),
                     servicePeriod = serviceTime,
-                    movieScreenings =
-                        screenDtoGroup.map { dto ->
-                            MovieScreening(
-                                movie =
-                                    Movie(
-                                        MovieName(dto.title),
-                                        RunningTime(dto.runningTime),
-                                    ),
-                                screenTime =
-                                    CinemaTimeRange(
-                                        start = CinemaTime(dto.startTime),
-                                        end = CinemaTime(dto.startTime).plusMinutes(dto.runningTime),
-                                    ),
-                                seatGroup = fixedSeatGroup,
-                            )
-                        },
+                    movieScreenings = movieScreenings,
                 )
             },
         )
@@ -199,91 +176,5 @@ class MovieReservationController(
     }
 
     companion object {
-        private val fixedSeatGroup =
-            SeatGroup(
-                seats =
-                    listOf(
-                        Seat(
-                            position = SeatPosition(SeatRow("A"), SeatColumn(1)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("A"), SeatColumn(2)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("A"), SeatColumn(3)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("A"), SeatColumn(4)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("B"), SeatColumn(1)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("B"), SeatColumn(2)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("B"), SeatColumn(3)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("B"), SeatColumn(4)),
-                            grade = SeatGrade.B,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("C"), SeatColumn(1)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("C"), SeatColumn(2)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("C"), SeatColumn(3)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("C"), SeatColumn(4)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("D"), SeatColumn(1)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("D"), SeatColumn(2)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("D"), SeatColumn(3)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("D"), SeatColumn(4)),
-                            grade = SeatGrade.S,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("E"), SeatColumn(1)),
-                            grade = SeatGrade.A,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("E"), SeatColumn(2)),
-                            grade = SeatGrade.A,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("E"), SeatColumn(3)),
-                            grade = SeatGrade.A,
-                        ),
-                        Seat(
-                            position = SeatPosition(SeatRow("E"), SeatColumn(4)),
-                            grade = SeatGrade.A,
-                        ),
-                    ),
-            )
     }
 }

@@ -1,7 +1,13 @@
-import dto.MovieScreeningDto
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
+import model.CinemaConstants
+import model.movie.Movie
+import model.movie.MovieName
+import model.movie.RunningTime
+import model.schedule.MovieScreening
+import model.time.CinemaTime
+import model.time.CinemaTimeRange
 import java.time.LocalDateTime
 
 class MovieRepositoryTest :
@@ -9,38 +15,38 @@ class MovieRepositoryTest :
         given("아무것도 저장된 정보가 없는 MovieRepository가 주어진다") {
             val movieRepository = MovieRepository("mem:testMovieRepository")
             `when`("4월 16일 19시에 상영하는 고양이랑사는남자를 MovieRepository에 저장한다") {
-                movieRepository.insertMovieScreenings(
-                    MovieScreeningDto(
-                        title = "고양이랑사는남자",
-                        screenId = 1,
-                        runningTime = 60,
-                        startTime = LocalDateTime.of(2026, 4, 16, 19, 0),
+                val movie = Movie(MovieName("고양이랑사는남자"), RunningTime(60))
+                val startTime = LocalDateTime.of(2026, 4, 16, 19, 0)
+                val movieScreening = MovieScreening(
+                    screenId = 1,
+                    movie = movie,
+                    screenTime = CinemaTimeRange(
+                        start = CinemaTime(startTime),
+                        end = CinemaTime(startTime).plusMinutes(60)
                     ),
+                    seatGroup = CinemaConstants.fixedSeatGroup
                 )
+
+                movieRepository.insertMovieScreenings(movieScreening)
+
                 then("모든 영화를 가져오면 4월 16일 19시에 상영하는 고양이랑사는남자가 포함되어있다.") {
-                    movieRepository.getAllMovieScreenings() shouldContain
-                        MovieScreeningDto(
-                            title = "고양이랑사는남자",
-                            screenId = 1,
-                            runningTime = 60,
-                            startTime = LocalDateTime.of(2026, 4, 16, 19, 0),
-                        )
+                    movieRepository.getAllMovieScreenings() shouldContain movieScreening
                 }
 
                 then("ID로 영화 상영 정보를 가져오면 저장된 정보와 일치한다") {
                     val movieId = movieRepository.getMovieId("고양이랑사는남자")!!
-                    val screeningId = movieRepository.getMovieScreeningId(movieId, LocalDateTime.of(2026, 4, 16, 19, 0))!!
-                    val screening = movieRepository.getMovieScreeningById(screeningId)
-                    screening?.title shouldBe "고양이랑사는남자"
-                    screening?.screenId shouldBe 1
-                    screening?.runningTime shouldBe 60
+                    val screeningId = movieRepository.getMovieScreeningId(movieId, startTime)!!
+                    val screening = movieRepository.getMovieScreeningById(screeningId)!!
+                    screening.movie.getName() shouldBe "고양이랑사는남자"
+                    screening.screenId shouldBe 1
+                    screening.movie.runningTime.getMinutes() shouldBe 60
                 }
 
                 then("ID로 영화 정보를 가져오면 저장된 정보와 일치한다") {
                     val movieId = movieRepository.getMovieId("고양이랑사는남자")!!
-                    val movie = movieRepository.getMovieById(movieId)
-                    movie?.title shouldBe "고양이랑사는남자"
-                    movie?.runningTime shouldBe 60
+                    val movieEntity = movieRepository.getMovieById(movieId)
+                    movieEntity?.title shouldBe "고양이랑사는남자"
+                    movieEntity?.runningTime shouldBe 60
                 }
             }
 

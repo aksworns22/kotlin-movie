@@ -1,8 +1,21 @@
-import dto.MovieReservationDto
-import dto.MovieScreeningDto
+
+import model.CinemaConstants
+import model.movie.Movie
+import model.movie.MovieName
+import model.movie.RunningTime
+import model.schedule.MovieScreening
+import model.time.CinemaTime
+import model.time.CinemaTimeRange
 import java.sql.Connection
 import java.sql.DriverManager
 import java.time.LocalDateTime
+
+data class MovieReservationDto(
+    val movieName: String,
+    val startTime: LocalDateTime,
+    val seatName: String,
+)
+
 
 data class MovieScreeningEntity(
     val id: Int,
@@ -144,13 +157,18 @@ class MovieRepository(
         }
     }
 
-    fun insertMovieScreenings(vararg movieScreenings: MovieScreeningDto) {
-        for (movieScreeningDTO in movieScreenings) {
-            val (title, screenId, runningTime, startTime) = movieScreeningDTO
+    fun insertMovieScreenings(vararg movieScreenings: MovieScreening) {
+        for (movieScreening in movieScreenings) {
+            val title = movieScreening.movie.getName()
+            val runningTime = movieScreening.movie.runningTime.getMinutes()
+            insertMovie(title, runningTime)
+
+            val movieId = getMovieId(title) ?: continue
+            val screenId = movieScreening.screenId
+            val startTime = movieScreening.getMovieStartTime()
+
             connection.createStatement().use { statement ->
-                insertMovie(title, runningTime)
-                val movieId = getMovieId(title) ?: continue
-                if (findMovieScreeningId(movieId, startTime) != null) continue
+                if (statement.executeQuery(getMovieScreeningQuery(movieId, startTime)).next()) return@use
                 statement.execute(insertMovieScreeningQuery(movieId, screenId, startTime))
             }
         }
@@ -164,18 +182,7 @@ class MovieRepository(
         }
     }
 
-    private fun findMovieScreeningId(
-        movieId: Int,
-        startTime: LocalDateTime,
-    ): Int? {
-        connection.createStatement().use { statement ->
-            val resultSet = statement.executeQuery(getMovieScreeningQuery(movieId, startTime))
-            if (!resultSet.next()) return null
-            return resultSet.getInt("id")
-        }
-    }
-
-    fun getAllMovieScreenings(): List<MovieScreeningDto> {
+    fun getAllMovieScreenings(): List<MovieScreening> {
         connection.createStatement().use { statement ->
             val movieResultSet = statement.executeQuery(getMovieQuery())
             val movies = mutableListOf<MovieEntity>()
@@ -202,31 +209,34 @@ class MovieRepository(
             }
             return screenings.map { screeningEntity ->
                 val movieEntity = movies.first { it.id == screeningEntity.movieId }
-                MovieScreeningDto(
-                    title = movieEntity.title.trim(),
-                    runningTime = movieEntity.runningTime,
-                    startTime = screeningEntity.startTime,
-                    screenId = screeningEntity.screenId,
-                )
+                toDomain(movieEntity, screeningEntity)
             }
         }
     }
 
-    fun getMovieScreeningById(id: Int): MovieScreeningDto? {
+    fun getMovieScreeningById(id: Int): MovieScreening? {
         connection.createStatement().use { statement ->
             statement.executeQuery("SELECT * FROM `movie_screenings` WHERE `id` = $id").use { rs ->
                 if (!rs.next()) return null
-                val movieId = rs.getInt("movie_id")
-                val startTime = rs.getTimestamp("start_time").toLocalDateTime()
-                val screenId = rs.getInt("screen_id")
+                val screeningEntity =
+                    MovieScreeningEntity(
+                        id = rs.getInt("id"),
+                        movieId = rs.getInt("movie_id"),
+                        startTime = rs.getTimestamp("start_time").toLocalDateTime(),
+                        screenId = rs.getInt("screen_id"),
+                    )
 
                 connection.createStatement().use { statement2 ->
-                    statement2.executeQuery("SELECT * FROM `movies` WHERE `id` = $movieId").use { movieRs ->
+                    statement2.executeQuery("SELECT * FROM `movies` WHERE `id` = ${screeningEntity.movieId}").use { movieRs ->
                         if (!movieRs.next()) return null
-                        val title = movieRs.getString("title").trim()
-                        val runningTime = movieRs.getInt("running_time")
+                        val movieEntity =
+                            MovieEntity(
+                                id = movieRs.getInt("id"),
+                                title = movieRs.getString("title").trim(),
+                                runningTime = movieRs.getInt("running_time"),
+                            )
 
-                        return MovieScreeningDto(title, screenId, runningTime, startTime)
+                        return toDomain(movieEntity, screeningEntity)
                     }
                 }
             }
@@ -290,5 +300,25 @@ class MovieRepository(
             val rs = statement.executeQuery(query)
             return rs.next()
         }
+    }
+
+    private fun toDomain(
+        movieEntity: MovieEntity,
+        screeningEntity: MovieScreeningEntity,
+    ): MovieScreening {
+        val movie =
+            Movie(
+                name = MovieName(movieEntity.title.trim()),
+                runningTime = RunningTime(movieEntity.runningTime),
+            )
+        val startTime = CinemaTime(screeningEntity.startTime)
+        val endTime = startTime.plusMinutes(movieEntity.runningTime)
+        val screenTime = CinemaTimeRange(startTime, endTime)
+        return MovieScreening(
+            screenId = screeningEntity.screenId,
+            movie = movie,
+            screenTime = screenTime,
+            seatGroup = CinemaConstants.fixedSeatGroup,
+        )
     }
 }

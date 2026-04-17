@@ -11,8 +11,9 @@ import java.time.LocalDateTime
 import java.util.Objects
 
 class MovieScreening(
-    private val movie: Movie,
-    private val screenTime: CinemaTimeRange,
+    val screenId: Int,
+    val movie: Movie,
+    val screenTime: CinemaTimeRange,
     private val seatGroup: SeatGroup,
 ) {
     val seatCount: Int get() = seatGroup.size
@@ -24,14 +25,14 @@ class MovieScreening(
 
     override fun equals(other: Any?): Boolean {
         if (other is MovieScreening) {
-            return movie == other.movie && screenTime == other.screenTime
+            return screenId == other.screenId && movie == other.movie && screenTime == other.screenTime
         }
         return false
     }
 
     fun isEqual(movieSeatSelection: MovieSeatSelection): Boolean = movieSeatSelection.isEqual(movie, screenTime)
 
-    override fun hashCode(): Int = Objects.hash(movie.hashCode(), screenTime.hashCode())
+    override fun hashCode(): Int = Objects.hash(screenId, movie.hashCode(), screenTime.hashCode())
 
     fun isSameStartDate(time: CinemaTime): Boolean = screenTime.isSameStartDate(time)
 

@@ -39,6 +39,7 @@ class MovieScheduleTest {
 
     private fun createOneHourMovieScreening(movie: Movie): MovieScreening =
         MovieScreening(
+            screenId = 1,
             movie = movie,
             screenTime =
                 CinemaTimeRange(

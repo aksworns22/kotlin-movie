@@ -50,6 +50,7 @@ class MovieReservationGroupTest {
             ).reserveSeat(
                 movieScreening =
                     MovieScreening(
+                        screenId = 1,
                         movie =
                             Movie(
                                 name = MovieName("자취하는남자"),
@@ -130,6 +131,7 @@ class MovieReservationGroupTest {
             ).reserveSeat(
                 movieScreening =
                     MovieScreening(
+                        screenId = 1,
                         movie =
                             Movie(
                                 name = MovieName("자취하는남자"),
@@ -187,6 +189,7 @@ class MovieReservationGroupTest {
         ).reserveSeat(
             movieScreening =
                 MovieScreening(
+                    screenId = 1,
                     movie =
                         Movie(
                             name = MovieName("자취하는남자"),

@@ -10,5 +10,7 @@ value class RunningTime(
         require(minute > 0) { "상영 시간은 0분 초과이어야 합니다." }
     }
 
+    fun getMinutes(): Int = minute
+
     fun isSameDuration(cinemaTimeRange: CinemaTimeRange): Boolean = cinemaTimeRange.durationMinute == minute
 }

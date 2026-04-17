@@ -81,6 +81,7 @@ class ScreenScheduleTest {
                 movieScreenings =
                     listOf(
                         MovieScreening(
+                            screenId = 1,
                             movie =
                                 Movie(
                                     name = MovieName("혼자사는남자"),
@@ -111,6 +112,7 @@ class ScreenScheduleTest {
                 movieScreenings =
                     listOf(
                         MovieScreening(
+                            screenId = 1,
                             movie =
                                 Movie(
                                     name = MovieName("혼자사는남자"),
@@ -147,6 +149,7 @@ class ScreenScheduleTest {
                 movieScreenings =
                     listOf(
                         MovieScreening(
+                            screenId = 1,
                             movie = movieOne,
                             screenTime =
                                 CinemaTimeRange(
@@ -162,6 +165,7 @@ class ScreenScheduleTest {
                 MovieName("혼자사는남자"),
                 listOf(
                     MovieScreening(
+                        screenId = 1,
                         movie = movieOne,
                         screenTime =
                             CinemaTimeRange(
@@ -190,6 +194,7 @@ class ScreenScheduleTest {
                     listOf(
                         movieScreening,
                         MovieScreening(
+                            screenId = 1,
                             movie = movieOne,
                             screenTime =
                                 CinemaTimeRange(
@@ -215,6 +220,7 @@ class ScreenScheduleTest {
             listOf(
                 Arguments.of(
                     MovieScreening(
+                        screenId = 1,
                         movie = movieOne,
                         screenTime =
                             CinemaTimeRange(
@@ -226,6 +232,7 @@ class ScreenScheduleTest {
                 ),
                 Arguments.of(
                     MovieScreening(
+                        screenId = 1,
                         movie = movieOne,
                         screenTime =
                             CinemaTimeRange(
@@ -237,6 +244,7 @@ class ScreenScheduleTest {
                 ),
                 Arguments.of(
                     MovieScreening(
+                        screenId = 1,
                         movie = movieOne,
                         screenTime =
                             CinemaTimeRange(
@@ -248,6 +256,7 @@ class ScreenScheduleTest {
                 ),
                 Arguments.of(
                     MovieScreening(
+                        screenId = 1,
                         movie = movieOne,
                         screenTime =
                             CinemaTimeRange(

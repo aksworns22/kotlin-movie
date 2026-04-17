@@ -4,7 +4,7 @@ import model.time.CinemaTimeRange
 
 data class Movie(
     private val name: MovieName,
-    private val runningTime: RunningTime,
+    val runningTime: RunningTime,
 ) {
     fun isSameRunningTime(cinemaTimeRange: CinemaTimeRange): Boolean = runningTime.isSameDuration(cinemaTimeRange)
 
