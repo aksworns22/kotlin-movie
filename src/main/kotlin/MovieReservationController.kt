@@ -174,7 +174,4 @@ class MovieReservationController(
             }
         }
     }
-
-    companion object {
-    }
 }

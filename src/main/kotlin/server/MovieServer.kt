@@ -1,15 +1,27 @@
 package server
 
 import MovieRepository
+import model.CinemaConstants
+import model.movie.Movie
+import model.movie.MovieName
+import model.movie.RunningTime
 import model.payment.DefaultMoviePayment
 import model.payment.PayType
 import model.payment.Point
 import model.reservation.MovieReservationGroup
-import model.seat.*
+import model.schedule.MovieScreening
+import model.seat.SeatColumn
+import model.seat.SeatPosition
+import model.seat.SeatRow
+import model.time.CinemaTime
+import model.time.CinemaTimeRange
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
 
@@ -51,7 +63,42 @@ class Application
 
 @RestController
 class MovieScreeningController {
-    val movieRepository: MovieRepository = MovieRepository(path = "~/test")
+    val movieRepository: MovieRepository = MovieRepository(path = "~/movieeee")
+
+    init {
+        movieRepository.insertMovieScreenings(
+            MovieScreening(
+                screenId = 1,
+                movie = Movie(MovieName("혼자사는남자"), RunningTime(60)),
+                screenTime =
+                    CinemaTimeRange(
+                        start = CinemaTime(LocalDateTime.of(2026, 4, 8, 10, 0)),
+                        end = CinemaTime(LocalDateTime.of(2026, 4, 8, 11, 0)),
+                    ),
+                seatGroup = CinemaConstants.fixedSeatGroup,
+            ),
+            MovieScreening(
+                screenId = 2,
+                movie = Movie(MovieName("아이언맨"), RunningTime(60)),
+                screenTime =
+                    CinemaTimeRange(
+                        start = CinemaTime(LocalDateTime.of(2026, 4, 9, 7, 0)),
+                        end = CinemaTime(LocalDateTime.of(2026, 4, 9, 8, 0)),
+                    ),
+                seatGroup = CinemaConstants.fixedSeatGroup,
+            ),
+            MovieScreening(
+                screenId = 3,
+                movie = Movie(MovieName("혼자사는남자"), RunningTime(60)),
+                screenTime =
+                    CinemaTimeRange(
+                        start = CinemaTime(LocalDateTime.of(2026, 4, 10, 20, 0)),
+                        end = CinemaTime(LocalDateTime.of(2026, 4, 10, 21, 0)),
+                    ),
+                seatGroup = CinemaConstants.fixedSeatGroup,
+            ),
+        )
+    }
 
     @GetMapping("/api/movies")
     fun getMovieScreenings(): List<MovieDto> {
@@ -96,10 +143,7 @@ class MovieScreeningController {
 
     @PostMapping("/api/reservations")
     @ResponseStatus(HttpStatus.CREATED)
-    fun createReservation(
-        @RequestBody request: ReservationRequest,
-    ): ReservationResponse {
-        println("Received reservation request: $request")
+    fun createReservation(request: ReservationRequest): ReservationResponse {
         var movieReservationGroup = MovieReservationGroup(emptySet())
         val screeningSeatMap = mutableMapOf<Int, List<String>>()
 
@@ -108,13 +152,11 @@ class MovieScreeningController {
                 val movieScreening =
                     movieRepository.getMovieScreeningById(res.screeningId)
                         ?: run {
-                            println("Screening not found for ID: ${res.screeningId}")
                             throw ResponseStatusException(HttpStatus.NOT_FOUND, "상영 정보를 찾을 수 없습니다: ${res.screeningId}")
                         }
 
                 for (seatName in res.seats) {
                     if (movieRepository.isReservedSeatById(res.screeningId, seatName)) {
-                        println("Seat already reserved: $seatName for screening: ${res.screeningId}")
                         throw ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 예약된 좌석입니다: $seatName")
                     }
 
@@ -125,7 +167,6 @@ class MovieScreeningController {
                                 column = SeatColumn(seatName.substring(1).toInt()),
                             )
                         } catch (e: Exception) {
-                            println("Invalid seat format: $seatName")
                             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 좌석 형식입니다: $seatName")
                         }
 
@@ -141,15 +182,16 @@ class MovieScreeningController {
                         try {
                             PayType.valueOf(request.paymentMethod)
                         } catch (e: Exception) {
-                            println("Invalid payment method: ${request.paymentMethod}")
-                            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 결제 수단입니다: ${request.paymentMethod}")
+                            throw ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "잘못된 결제 수단입니다: ${request.paymentMethod}",
+                            )
                         },
                     point = Point(request.usedPoints),
                 )
             val paymentResult = payment.calculate()
 
             val reservationId = movieRepository.insertMovieReservationBatch(screeningSeatMap)
-            println("Successfully created reservation: $reservationId")
 
             return ReservationResponse(
                 reservationId = reservationId,
@@ -161,13 +203,9 @@ class MovieScreeningController {
         } catch (e: ResponseStatusException) {
             throw e
         } catch (e: Exception) {
-            println("Unexpected error: ${e.message}")
             e.printStackTrace()
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
         }
-    }
-
-    companion object {
     }
 }
 
