@@ -1,13 +1,8 @@
+import dto.MovieReservationDto
+import dto.MovieScreeningDto
 import java.sql.Connection
 import java.sql.DriverManager
 import java.time.LocalDateTime
-
-data class MovieScreeningDto(
-    val title: String,
-    val screenId: Int,
-    val runningTime: Int,
-    val startTime: LocalDateTime,
-)
 
 data class MovieScreeningEntity(
     val id: Int,
@@ -20,12 +15,6 @@ data class MovieEntity(
     val id: Int,
     val title: String,
     val runningTime: Int,
-)
-
-data class MovieReservationDto(
-    val movieName: String,
-    val startTime: LocalDateTime,
-    val seatName: String,
 )
 
 class MovieRepository(
@@ -121,6 +110,19 @@ class MovieRepository(
         }
     }
 
+    fun getMovieScreeningId(
+        movieId: Int,
+        startTime: LocalDateTime,
+    ): Int? {
+        connection.createStatement().use { statement ->
+            val resultSet = statement.executeQuery(getMovieScreeningQuery(movieId, startTime))
+            if (resultSet.next()) {
+                return resultSet.getInt("id")
+            }
+        }
+        return null
+    }
+
     fun insertMovieReservation(vararg movieReservationDtoGroup: MovieReservationDto) {
         val reservationId = getNextReservationId()
         for (movieReservationDto in movieReservationDtoGroup) {
@@ -154,7 +156,7 @@ class MovieRepository(
         }
     }
 
-    private fun getMovieId(title: String): Int? {
+    fun getMovieId(title: String): Int? {
         connection.createStatement().use { statement ->
             val resultSet = statement.executeQuery(getMovieQuery(title))
             if (!resultSet.next()) return null
@@ -207,6 +209,63 @@ class MovieRepository(
                     screenId = screeningEntity.screenId,
                 )
             }
+        }
+    }
+
+    fun getMovieScreeningById(id: Int): MovieScreeningDto? {
+        connection.createStatement().use { statement ->
+            statement.executeQuery("SELECT * FROM `movie_screenings` WHERE `id` = $id").use { rs ->
+                if (!rs.next()) return null
+                val movieId = rs.getInt("movie_id")
+                val startTime = rs.getTimestamp("start_time").toLocalDateTime()
+                val screenId = rs.getInt("screen_id")
+
+                connection.createStatement().use { statement2 ->
+                    statement2.executeQuery("SELECT * FROM `movies` WHERE `id` = $movieId").use { movieRs ->
+                        if (!movieRs.next()) return null
+                        val title = movieRs.getString("title").trim()
+                        val runningTime = movieRs.getInt("running_time")
+
+                        return MovieScreeningDto(title, screenId, runningTime, startTime)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getMovieById(id: Int): MovieEntity? {
+        connection.createStatement().use { statement ->
+            statement.executeQuery("SELECT * FROM `movies` WHERE `id` = $id").use { rs ->
+                if (!rs.next()) return null
+                return MovieEntity(
+                    id = rs.getInt("id"),
+                    title = rs.getString("title").trim(),
+                    runningTime = rs.getInt("running_time"),
+                )
+            }
+        }
+    }
+
+    fun insertMovieReservationBatch(screeningSeatMap: Map<Int, List<String>>): Int {
+        val reservationId = getNextReservationId()
+        connection.createStatement().use { statement ->
+            for ((screeningId, seats) in screeningSeatMap) {
+                for (seatName in seats) {
+                    statement.execute(insertMovieReservationQuery(reservationId, screeningId, seatName))
+                }
+            }
+        }
+        return reservationId
+    }
+
+    fun isReservedSeatById(
+        screeningId: Int,
+        seatName: String,
+    ): Boolean {
+        val query = "SELECT 1 FROM `movie_reservations` WHERE `screening_id` = $screeningId AND `seat_name` = '$seatName' LIMIT 1"
+        connection.createStatement().use { statement ->
+            val rs = statement.executeQuery(query)
+            return rs.next()
         }
     }
 

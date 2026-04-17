@@ -1,3 +1,4 @@
+import dto.MovieReservationDto
 import view.InputView
 import view.MovieReservationResultDto
 import view.OutputView

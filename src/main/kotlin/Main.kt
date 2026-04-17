@@ -1,3 +1,4 @@
+import dto.MovieScreeningDto
 import model.time.CinemaTime
 import model.time.CinemaTimeRange
 import java.time.LocalDateTime

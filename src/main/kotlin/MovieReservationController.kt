@@ -27,6 +27,7 @@ class MovieReservationController(
     serviceTime: CinemaTimeRange,
 ) {
     private val cinemaSchedule =
+
         CinemaSchedule(
             movieRepository.getAllMovieScreenings().groupBy { it.screenId }.map { (screenId, screenDtoGroup) ->
                 ScreenSchedule(
