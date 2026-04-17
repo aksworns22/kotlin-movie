@@ -20,6 +20,7 @@ import org.springframework.boot.runApplication
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
@@ -143,7 +144,9 @@ class MovieScreeningController {
 
     @PostMapping("/api/reservations")
     @ResponseStatus(HttpStatus.CREATED)
-    fun createReservation(request: ReservationRequest): ReservationResponse {
+    fun createReservation(
+        @RequestBody request: ReservationRequest,
+    ): ReservationResponse {
         var movieReservationGroup = MovieReservationGroup(emptySet())
         val screeningSeatMap = mutableMapOf<Int, List<String>>()
 
